@@ -1,0 +1,142 @@
+using Microsoft.AspNetCore.Mvc;
+
+namespace myApp.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class MyAppsController : ControllerBase
+{
+    static HttpClient client = new HttpClient();
+    Product resulet = new Product();
+    // 接收資料(字串)
+    public string jsondata = null;
+    // datalist=資料集，接收的資料，經過處理後最後會在這裡
+    public static List<Product> datalist = null;
+    // 注入Logging的服務-->記錄管理Log
+    private readonly ILogger<MyAppsController> _logger;
+    // 注入ITservice的服務
+    private readonly ITservice _itservice;
+    public MyAppsController(ILogger<MyAppsController> logger, ITservice itservice)
+    {
+        // 建構元注入
+        _logger = logger;
+        _itservice = itservice;
+    }
+
+
+    [HttpGet]
+    [Route("~/MyApps")]
+    public async Task<List<Product>> Get(int id)
+    {
+        HttpResponseMessage response = null;
+        // get請求方法
+        if (id > 0)
+        {
+            response = await client.GetAsync($"https://jsonplaceholder.typicode.com/posts/{id}");
+            jsondata = await response.Content.ReadAsStringAsync();
+            Product returnValue = System.Text.Json.JsonSerializer.Deserialize<Product>(jsondata);
+            datalist.Clear();
+            datalist.Add(returnValue);
+        }
+        else
+        {
+            response = await client.GetAsync("https://jsonplaceholder.typicode.com/posts");
+            //狀態碼
+            var statusCode = response.EnsureSuccessStatusCode();
+            // 序列化，將resulet物件傳換為"字串"
+            jsondata = System.Text.Json.JsonSerializer.Serialize(resulet);
+            // 用get方法獲取 json資料並以字串的形式儲存
+            jsondata = await response.Content.ReadAsStringAsync();
+            //字串轉換為json->object，並反序列化
+            datalist = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(jsondata);
+        }
+        return datalist;
+    }
+
+    [HttpGet]
+    [Route("~/MyApps/{id}")]
+    public async Task<List<Product>> SingleGet(int? id)
+
+    {
+
+        HttpResponseMessage response = await client.GetAsync($"https://jsonplaceholder.typicode.com/posts/?userId={id}");
+        // 將 response的內容讀取並以字串的形式儲存
+        jsondata = await response.Content.ReadAsStringAsync();
+        List<Product> returnValue = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(jsondata);
+        return returnValue;
+
+    }
+
+
+
+    [HttpPost]
+    [Route("~/MyApps/AllSearch")]
+    // [FromBody]='參數繫結' searchValue data='模型繫結/綁定'
+    public string AllSearch([FromBody] searchValue data)
+    {
+        string returndata = System.Text.Json.JsonSerializer.Serialize(_itservice.AllSearch(data.title, data.id, datalist));
+        return returndata;
+    }
+
+    [HttpPost]
+    [Route("~/MyApps/IdSearch")]
+    public async Task<string> IdSearch([FromBody] int id)
+    {
+        //  Product型別資料序列化成字串。
+        string fildedData = System.Text.Json.JsonSerializer.Serialize(_itservice.IdSearch(id, datalist));
+        return fildedData;
+        // return "Idsearch";
+    }
+
+    [HttpPost]
+    [Route("~/MyApps/TitleSearch")]
+    public async Task<string> TitleSearch([FromBody] string title)
+    {
+        //  Product型別資料序列化成字串(序列化)。
+        string fildedData = System.Text.Json.JsonSerializer.Serialize(_itservice.TitleSearch(title, datalist));
+        return fildedData;
+        // return "Idsearch";
+    }
+
+    [HttpPut]
+    [Route("~/MyApps/AddData")]
+    public List<Product> AddData([FromBody] Product data)
+    {
+        //  將json=>字串==序列化
+        // string _data = System.Text.Json.JsonSerializer.Serialize(data);
+        // datalist.Add(data);
+        // 因為沒有真的資料庫，所以需要顯示在畫面上
+        // return "修改資料成功";
+        return datalist;
+    }
+    [HttpDelete]
+    [Route("~/MyApps/DeletData")]
+
+    public string DeletData()
+    {
+        return "刪除資料資料成功";
+    }
+
+}
+
+
+
+public class searchValue
+{
+    // 模型繫結
+    // 同時搜尋id,title
+    // 對應到前端的searchValue的格式
+    public int id { get; set; }
+    public string title { get; set; }
+}
+
+public class modifyhValue
+{
+    // 模型繫結
+    // id,Title,userId,Body
+    // 對應到前端的modifyValue的格式
+    public int userId { get; set; }
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public string Body { get; set; }
+}
