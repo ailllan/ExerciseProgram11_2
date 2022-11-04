@@ -23,12 +23,13 @@
             </el-aside>
             <el-main class="main">
                 <label>id搜尋</label>
-                <el-input size="mini" maxlength="5" v-model="id" @keyup.enter="IdSearch"></el-input>
+                <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="id"></el-input>
                 <br />
                 <label>你搜尋的id是:{{id}}</label>
                 <br />
                 <label>標題搜尋(title)</label>
-                <el-input size="mini" type="text" v-model="title" @keyup.enter="TitleSearch"></el-input>
+                <el-input size="mini" type="text" @keyup.enter.native="TitleSearch" v-model="title"></el-input>
+                <!-- <input @keyup.enter="TitleSearch" v-model="title"></input> -->
                 <br />
                 <label>你搜尋的標題是:{{title}}</label>
                 <br />
@@ -52,7 +53,7 @@
 
             <el-contariner>
                 <el-main class="botton">
-                    修改資料區
+                    修改新增
                     <br />
                     <label>Userid輸入</label>
                     <el-input size="mini" maxlength="5" v-model="modifyValue.UserId"></el-input>
@@ -65,17 +66,17 @@
                     <label>你輸入的id是:{{modifyValue.Id}}</label>
                     <br />
                     <label>title輸入</label>
-                    <el-input size="mini" maxlength="5" v-model="modifyValue.Title"></el-input>
+                    <el-input size="mini" v-model="modifyValue.Title"></el-input>
                     <br />
                     <label>你輸入的title是:{{modifyValue.Title}}</label>
                     <br />
                     <label>body輸入</label>
-                    <el-input size="mini" maxlength="5" v-model="modifyValue.Body"></el-input>
+                    <el-input size="mini" v-model="modifyValue.Body"></el-input>
                     <br />
                     <label>你輸入的body是:{{modifyValue.Body}}</label>
                     <br />
                     <el-button type="primary" @click="AddData">新增資料</el-button>
-                    <el-button type="primary" @click="DeleteData">刪除資料</el-button>
+                    <el-button type="primary" @click="DeleteSingleData">刪除特定資料</el-button>
                 </el-main>
             </el-contariner>
 
@@ -95,169 +96,160 @@
                 <br />
                 },
                 <br />
+                <div v-show="deletemode">
+                    <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
+                </div>
+
+                <br />
             </div>
 
         </section>
     </div>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.min.js"
+    integrity="sha512-9PmLIATEd4w0OxdTHq61p12lQqa8OtDC6nXu0+S1Icb800oxoADle+gaPfmAXLa35KSvk/6bGeNRfi3nq0Hvvw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- 引入element-ui组件庫 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
 
-</head>
+    ; (function () {
+        // func包裹住程式，當與其他人的程式並接時候就不會有命名衝突或是區塊衝突等問題
+        const headers = {
+            // HttpHeader設定檔(傳送內容以外的資訊)
+            'Content-Type': 'application/json;',
+        };
 
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.min.js"
-        integrity="sha512-9PmLIATEd4w0OxdTHq61p12lQqa8OtDC6nXu0+S1Icb800oxoADle+gaPfmAXLa35KSvk/6bGeNRfi3nq0Hvvw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- 引入element-ui组件庫 -->
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-    <script>
-
-        ; (function () {
-            // func包裹住程式，當與其他人的程式並接時候就不會有命名衝突或是區塊衝突等問題
-            const headers = {
-                // HttpHeader設定檔(傳送內容以外的資訊)
-                'Content-Type': 'application/json;',
-            };
-
-            const app = new Vue({
-                el: '#app',
-                data: {
+        const app = new Vue({
+            el: '#app',
+            data: {
+                id: null,
+                title: null,
+                showdata: false,
+                outputData: [],
+                searchValue: {
                     id: null,
                     title: null,
-                    showdata: false,
-                    outputData: [],
-                    templateData: null,
-                    searchValue: {
-                        id: null,
-                        title: null,
-                    },
-                    dataCount: 0,
-                    UserId: 0,
-                    modifyValue: {
-                        UserId: null,
-                        Id: null,
-                        Title: null,
-                        Body: null,
-                    },
-
                 },
-                methods: {
-                    GetData() {
-                        axios.get('http://localhost:5293/MyApps')
-                            .then((res) => {
-                                this.outputData = res.data;
-                                //暫存資料
-                                this.templateData = this.outputData;
-                                console.log("資料獲取成功");
-                            })
-                            .catch((error) => { console.error(error) })
-                    },
-                    // 顯示資料
-                    showData() { this.showdata = !(this.showdata) },
-                    // 搜尋ID的方法
-                    IdSearch() {
-                        if (isNaN(this.id)) {
-                            alert(`請輸入數字`);
-                        } else if (this.id >= this.templateData.length && this.id > 0) {
-                            alert(`搜尋值找不到，請重新輸入`);
-                        }
-                        else {
+                DataLength: 0,
+                dataCount: 0,
+                UserId: 0,
+                modifyValue: {
+                    UserId: null,
+                    Id: null,
+                    Title: null,
+                    Body: null,
+                },
+                deletemode: true,
 
-                            // 將id的資料型別轉數字
-                            this.id = parseInt(this.id);
-                            axios.post('http://localhost:5293/MyApps/IdSearch',
-                                this.id, { headers: headers })
-                                // axios請求提交數據,(位址，資料，表頭)
-                                .then((response) => {
-                                    // 回傳的值在這裡
-                                    console.log(response.data);
-                                    this.outputData = [];
-                                    this.outputData.push(response.data);
-                                })
-                                .catch((error) => { console.log(error); })
-                        }
-                        // 清空輸入值
-                        this.id = null;
-                    },
-                    // 搜尋Title的方法
-                    TitleSearch() {
-                        axios.post('http://localhost:5293/MyApps/TitleSearch',
-                            this.title, { headers: headers })
+            },
+            methods: {
+                GetData() {
+                
+                    axios.get('http://localhost:5293/MyApps')
+                        .then((res) => {
+                            this.outputData = res.data;
+                            DataLength = this.outputData.length;
+                            //暫存資料
+                            console.log("資料獲取成功");
+                        })
+                        .catch((error) => { console.error(error) })
+                },
+                // 顯示資料
+                showData() { this.showdata = !(this.showdata) },
+                // 搜尋ID的方法
+                IdSearch() {
+       
+                    if (isNaN(this.id)) {
+                        alert(`請輸入數字`);
+                    } else if (this.id > DataLength && this.id > 0) {
+                        console.log(this.outputData.length);
+                        alert(`搜尋值找不到，請重新輸入`);
+                    }
+                    else {
+
+                        // 將id的資料型別轉數字
+                        this.id = parseInt(this.id);
+                        axios.post('http://localhost:5293/MyApps/IdSearch',
+                            this.id, { headers: headers })
                             // axios請求提交數據,(位址，資料，表頭)
                             .then((response) => {
                                 // 回傳的值在這裡
-                                console.log(response.data);
+                                console.log(`搜尋成功${response.data}`);
                                 this.outputData = [];
                                 this.outputData.push(response.data);
                             })
                             .catch((error) => {
-                                console.log('跑錯誤了');
-                                console.log(this.title);
-                                console.log(error);
+                                console.log(`搜尋失敗`);
                             })
-                        // 清空輸入值
-                        this.title = null;
-                    },
-                    AllSearch() {
-                        console.log(this.searchValue);
-                        if (isNaN(this.id)) {
-                            alert(`請輸入數字`);
-                        } else if (this.id >= this.templateData.length && this.id > 0) {
-                            alert(`搜尋值找不到，請重新輸入`);
+                    }
+                    // 清空輸入值
+                    this.id = null;
+                },
+                // 搜尋Title的方法
+                TitleSearch() {
+                    
+                    console.log(`TitleSearch觸發`);
+                    axios.post('http://localhost:5293/MyApps/TitleSearch',
+                        this.title, { headers: headers })
+                        // axios請求提交數據,(位址，資料，表頭)
+                        .then((response) => {
+                            // 回傳的值在這裡
+                            console.log(`搜尋成功${response.data}`);
+                            this.outputData = [];
+                            this.outputData.push(response.data);
+                        })
+                        .catch((error) => {
+                            console.log(`搜尋失敗${this.title}`);
+                            console.log(error);
+                        })
+                    // 清空輸入值
+                    this.title = null;
+                },
+                AllSearch() {
+                    
+                    console.log(this.searchValue);
+                    if (isNaN(this.id)) {
+                        alert(`請輸入數字`);
+                    } else if (this.id >= this.templateData.length && this.id > 0) {
+                        alert(`搜尋值找不到，請重新輸入`);
+                    }
+                    else if (this.id == null || this.title == null) {
+                        // 可改善點
+                        if (this.id == null && this.title != null) {
+                            this.TitleSearch()
+                        } else if (this.id != null && this.title == null) {
+                            this.IdSearch()
                         }
-                        else if (this.id == null || this.title == null) {
-                            // 可改善點
-                            if (this.id == null && this.title != null) {
-                                this.TitleSearch()
-                            } else if (this.id != null && this.title == null) {
-                                this.IdSearch()
-                            }
-                        }
-                        else {
-                            this.searchValue.id = parseInt(this.id);
-                            this.searchValue.title = this.title;
-                        }
+                    }
+                    else {
+                        this.searchValue.id = parseInt(this.id);
+                        this.searchValue.title = this.title;
+                    }
 
-                        axios.post('http://localhost:5293/MyApps/AllSearch',
-                            this.searchValue, { headers: headers })
-                            // axios請求提交數據,(位址，資料，表頭)
-                            .then((response) => {
-                                // 回傳的值在這裡
-                                console.log(response.data);
-                                this.outputData = response.data
-                            })
-                            .catch((error) => {
-                                console.log(`Allsearch錯誤`);
-                                console.log(this.searchValue);
-                                console.log(error);
-                            })
-                        this.id = null;
-                        this.title = null;
-                    },
-                    SingleGetData() {
-                        // 用GET的方式單獨查詢一筆資料
-                        if (this.dataCount < 0) {
+                    axios.post('http://localhost:5293/MyApps/AllSearch',
+                        this.searchValue, { headers: headers })
+                        // axios請求提交數據,(位址，資料，表頭)
+                        .then((response) => {
+                            // 回傳的值在這裡
+                            console.log(response.data);
+                            this.outputData = response.data
+                        })
+                        .catch((error) => {
+                            console.log(`Allsearch錯誤${this.searchValue}`);
+                            console.log(error);
+                        })
+                    this.id = null;
+                    this.title = null;
+                },
+                SingleGetData() {
+                    
+                    // 用GET的方式單獨查詢一筆資料
+                    if (this.dataCount < 0) {
 
-                        }
-                        else {
-                            axios.get(`http://localhost:5293/MyApps/?id=${this.dataCount}`)
-                                .then((response) => {
-                                    console.log(response.data);
-                                    this.outputData = [];
-                                    this.outputData = response.data;
-                                })
-                                .catch((error) => {
-                                    console.log(`取得資料失敗`);
-                                    console.log(error);
-                                })
-                        }
-
-                        this.dataCount = 0;
-                    },
-                    SingleGetUserId() {
-                        // 查詢userid
-                        console.log(this.UserId);
-                        axios.get(`http://localhost:5293/MyApps/${this.UserId}`)
-                            // 差別點
+                    }
+                    else {
+                        axios.get(`http://localhost:5293/MyApps/?id=${this.dataCount}`)
                             .then((response) => {
                                 console.log(response.data);
                                 this.outputData = [];
@@ -267,47 +259,103 @@
                                 console.log(`取得資料失敗`);
                                 console.log(error);
                             })
-                        this.UserId = 0;
+                    }
 
-                    },
-                    AddData() {
-                        console.log(this.modifyValue);
-                        // 新增資料
-                        if (this.modifyValue == null) {
-                            return null;
-                        }
-                        else {
-                            axios.put('http://localhost:5293/MyApps/AddData',
-                                this.modifyValue, { headers: headers })
-                                .then((response) => {
-                                    console.log(`推送資料成功`);
-                                    console.log(response);
-                                })
-                                .catch((error) => {
-                                    console.log(`推送資料失敗`);
-                                    console.log(error);
-                                })
-                        }
-                    },
-                    DeleteData() {
-                        // 刪除資料
-                        if (this.modifyValue == null) {
+                    this.dataCount = 0;
+                },
+                SingleGetUserId() {
+                    
+                    // 查詢userid
+                    console.log(this.UserId);
+                    axios.get(`http://localhost:5293/MyApps/${this.UserId}`)
+                        // 差別點
+                        .then((response) => {
+                            console.log(response.data);
+                            this.outputData = [];
+                            this.outputData = response.data;
+                        })
+                        .catch((error) => {
+                            console.log(`取得資料失敗`);
+                            console.log(error);
+                        })
+                    this.UserId = 0;
 
-                        }
-                        else {
-                            let pushData = {
-                                id: this.modifyId,
-                                title: this.modifyTitle,
-                            }
-                        }
-                    },
+                },
+                AddData() {
+                    console.log(this.modifyValue);
+                    // 新增資料
+                    if (this.modifyValue == null) {
+                        return null;
+                    }
+                    else {
+                        axios.put('http://localhost:5293/MyApps/AddData',
+                            this.modifyValue, { headers: headers })
+                            .then((response) => {
+                                console.log(`推送資料成功`);
+                                console.log(response);
+                                this.outputData = [];
+                                this.outputData = response.data;
+                                DataLength = this.outputData.length;
+                            })
+                            .catch((error) => {
+                                console.log(`推送資料失敗`);
+                                console.log(error);
+                            })
+                    }
+                    // 清空輸入值
+                    this.modifyValue = {};
+                },
+                DeleteData(id) {
+                    // 單筆資料刪除
+                    console.log(id);
+                    axios.delete(`http://localhost:5293/MyApps/DeletData/${id}`)
+                        .then((response) => {
+                            console.log(`刪除資料成功`);
+                            console.log(response);
+                            this.outputData = [];
+                            // 更新前端資料畫面
+                            this.outputData = response.data;
+                            DataLength = this.outputData.length;
+                        })
+                        .catch((error) => {
+                            console.log(`刪除資料失敗`);
+                            console.log(error);
+                        })
+                    this.modifyValue = {};
                 },
 
-            })
-        })()
+                DeleteSingleData() {
+                    // 特定資料刪除
+                    if (this.modifyValue.Id == null && this.modifyValue.Title == null
+                        && this.modifyValue.UserId == null && this.modifyValue.Body == null) {
+                        alert("輸入值為空");
+                    }
+                    else {
+                        axios.delete(`http://localhost:5293/MyApps/DeleteSingleData`,
+                            { data: this.modifyValue }, { headers: headers })
+                            .then((response) => {
+
+                                console.log(`資料刪除成功`);
+                                console.log(response);
+                                // 更新前端資料畫面
+                                this.outputData = [];
+                                this.outputData = response.data;
+                            })
+                            .catch((error) => {
+                                console.log(`資料刪除失敗`);
+                                console.log(error);
+
+                            })
+                    }
+                    this.modifyValue = {};
+                },
+            },
+
+        })
+    })()
 
 
-    </script>
+</script>
 </body>
 
 </html>

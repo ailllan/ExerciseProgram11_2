@@ -1,12 +1,13 @@
-.content{
+.content {
     background-color: gray;
-margin: 0;
-padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
-.botton{
+.botton {
     background-color: orange;
 }
-.footer{
-   background-color: orange;
+
+.footer {
+    background-color: orange;
 }
