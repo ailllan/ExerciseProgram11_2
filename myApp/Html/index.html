@@ -10,7 +10,6 @@
     <!-- 引入element-ui樣式 -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="import" href="menu.html" />
 </head>
 
 <body>
@@ -26,7 +25,7 @@
                         <el-button type="primary" @click="showData">顯示資料</el-button>
                     </el-col>
                     <el-col :span="10">
-                        <el-button type="primary" @click="dialogVisible=true">彈出視窗</el-button>
+                        <el-button type="primary" @click="ShowDiaLog">彈出視窗</el-button>
                     </el-col>
                 </el-row>
                 <br />
@@ -111,13 +110,12 @@
             </div>
 
         </section>
-
+        <!-- 跳出視窗 -->
         <el-dialog title="Menu" :visible.sync="dialogVisible" @close="" class="MenuDialog">
             <menu-container></menu-container>
+            <div w3-include-html="menu.html"></div>
             <el-button @click="dialogVisible = false">取消</el-button>
             <el-button type="primary" @click="dialogVisible = false">送出</el-button>
-
-
         </el-dialog>
     </div>
 </body>
@@ -127,19 +125,38 @@
 <!-- 引入element-ui组件庫 -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script>
+
     // func包裹住程式，當與其他人的程式並接時候就不會有命名衝突或是區塊衝突等問題
     ; (function () {
         // HttpHeader設定檔(傳送內容以外的資訊)
         const headers = {
             'Content-Type': 'application/json;',
         };
-        Vue.component('menu-container', {
-            data:  {
-       
-            },
-            template: '<div>這裡是Menu 顯示</div>',
-        })
 
+
+        Vue.component('menu-container', {
+            data: function () {
+                let _data='';
+                fetch('./importTest.html')
+                    .then((res) => {
+                        console.log(`成功`);
+                        console.log(res);
+                        return res.text();
+                    })
+                    .then((data) => {
+                        _data = data;
+                         console.log(_data);
+                    })
+                    .catch((err) => {
+                        console.log(`錯誤`);
+                        console.log(err);
+                    })
+                return {
+                    dialogContext:_data,
+                }
+            },
+            template: `<div>{{dialogContext}}<div>`,
+        })
         const app = new Vue({
             el: '#app',
             data: {
@@ -161,11 +178,10 @@
                     Body: null,
                 },
                 dialogVisible: false,
-                contain: '<div>Hello</div>',
+                dialogcontain: null,
             },
             methods: {
                 GetData() {
-
                     axios.get('http://localhost:5293/MyApps')
                         .then((res) => {
                             this.outputData = res.data;
@@ -179,7 +195,6 @@
                 showData() { this.showdata = !(this.showdata) },
                 // 搜尋ID的方法
                 IdSearch() {
-
                     if (isNaN(this.id)) {
                         alert(`請輸入數字`);
                     } else if (this.id > DataLength && this.id > 0) {
@@ -364,7 +379,8 @@
                     this.modifyValue = {};
                 },
                 ShowDiaLog() {
-                    dialogVisible = true;
+                    this.dialogVisible = true;
+
                 },
                 components: {
                 }
