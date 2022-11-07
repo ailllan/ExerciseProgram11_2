@@ -12,7 +12,7 @@ public class MyAppsController : ControllerBase
     public string jsondata = null;
     // datalist=資料集，接收的資料，經過處理後最後會在這裡
     // 下方是兩種不同的初始化方式。
-    public static List<Product> datalist = new List<Product>();
+    public static List<Product> datalist;
     // public static List<Product> datalist;
     // 注入Logging的服務-->記錄管理Log
     private readonly ILogger<MyAppsController> _logger;
@@ -22,6 +22,7 @@ public class MyAppsController : ControllerBase
     {
         // 建構元注入
         // 所有在建構元的變數，都要註冊。
+        List<Product> datalist = new List<Product>();
         _logger = logger;
         _itservice = itservice;
         // datalist=_datalist;
@@ -127,18 +128,27 @@ public class MyAppsController : ControllerBase
         // id過濾
         // 將id符合的元素刪除。
         datalist.Remove(_itservice.IdSearch(data.id, datalist));
-        // title過濾
-        datalist.Remove(_itservice.TitleSearch(data.title, datalist));
+        // 判斷不為空值
+        if (data.title != null)
+        {
+            // title過濾
+            datalist.Remove(_itservice.TitleSearch(data.title, datalist));
+        }
+
         // userid過濾
         foreach (var item in _itservice.UserIdSearch(data.userId, datalist))
         {
             datalist.Remove(item);
         }
 
-        foreach (var item in _itservice.BodySearch(data.body, datalist))
+        if (data.body != null)
         {
-            datalist.Remove(item);
+            foreach (var item in _itservice.BodySearch(data.body, datalist))
+            {
+                datalist.Remove(item);
+            }
         }
+
         //body過濾
 
         //移除資料
