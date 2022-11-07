@@ -7,31 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- 引入element-ui樣式 -->
+    <!-- 引入element-ui樣式   --> 
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="import" href="menu.html" />
 </head>
 
 <body>
     <div id="app">
         <el-container class="content">
-            <el-aside class="aside">
-                <br />
-                <el-row :gutter="10" type="flex">
-                    <el-col :span="10">
-                        <el-button type="primary" @click="GetData">獲取資料</el-button>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-button type="primary" @click="showData">顯示資料</el-button>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-button type="primary" @click="dialogVisible=true">彈出視窗</el-button>
-                    </el-col>
-                </el-row>
-                <br />
-
-            </el-aside>
             <el-main class="main">
                 <label>id搜尋</label>
                 <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="id"></el-input>
@@ -61,8 +44,7 @@
                 <el-button type="primary" @click="SingleGetUserId">查詢UserID</el-button>
                 <br />
             </el-main>
-
-            <el-contariner>
+            <!-- <el-contariner>
                 <el-main class="botton">
                     修改新增
                     <br />
@@ -89,9 +71,9 @@
                     <el-button type="primary" @click="AddData">新增資料</el-button>
                     <el-button type="primary" @click="DeleteSingleData">刪除特定資料</el-button>
                 </el-main>
-            </el-contariner>
+            </el-contariner> -->
         </el-container>
-        <section v-show="showdata">
+        <section>
             <!-- 輸出資料區 -->
             <div v-model="outputData" v-for="(item,index) in outputData">
                 {
@@ -106,19 +88,14 @@
                 <br />
                 },
                 <br />
-                <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
+                <div v-show="deletemode">
+                    <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
+                </div>
+
                 <br />
             </div>
 
         </section>
-
-        <el-dialog title="Menu" :visible.sync="dialogVisible" @close="" class="MenuDialog">
-            <menu-container></menu-container>
-            <el-button @click="dialogVisible = false">取消</el-button>
-            <el-button type="primary" @click="dialogVisible = false">送出</el-button>
-
-
-        </el-dialog>
     </div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.min.js"
@@ -127,19 +104,13 @@
 <!-- 引入element-ui组件庫 -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script>
-    // func包裹住程式，當與其他人的程式並接時候就不會有命名衝突或是區塊衝突等問題
+
     ; (function () {
-        // HttpHeader設定檔(傳送內容以外的資訊)
+        // func包裹住程式，當與其他人的程式並接時候就不會有命名衝突或是區塊衝突等問題
         const headers = {
+            // HttpHeader設定檔(傳送內容以外的資訊)
             'Content-Type': 'application/json;',
         };
-        Vue.component('menu-container', {
-            data:  {
-       
-            },
-            template: '<div>這裡是Menu 顯示</div>',
-        })
-
         const app = new Vue({
             el: '#app',
             data: {
@@ -160,8 +131,7 @@
                     Title: null,
                     Body: null,
                 },
-                dialogVisible: false,
-                contain: '<div>Hello</div>',
+
             },
             methods: {
                 GetData() {
@@ -363,11 +333,6 @@
                     }
                     this.modifyValue = {};
                 },
-                ShowDiaLog() {
-                    dialogVisible = true;
-                },
-                components: {
-                }
             },
 
         })
