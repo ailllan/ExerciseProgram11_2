@@ -1,37 +1,132 @@
-<script type="text/x-template" id="menuComponent">
-    <el-main class="main">
-        <label>id搜尋</label>
-        <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="id"></el-input>
-        <br />
-        <label>你搜尋的id是:{{id}}</label>
-        <br />
-        <label>標題搜尋(title)</label>
-        <el-input size="mini" type="text" @keyup.enter.native="TitleSearch" v-model="title"></el-input>
-        <!-- <input @keyup.enter="TitleSearch" v-model="title"></input> -->
-        <br />
-        <label>你搜尋的標題是:{{title}}</label>
-        <br />
-        <el-button type="primary" @click="AllSearch">共同搜尋</el-button>
-        <br />
-        <label>取得特定筆資料</label>
-        <el-input size="mini" type="number" v-model="dataCount"></el-input>
-        <br />
-        <el-button type="primary" @click="SingleGetData">取得第{{dataCount}}筆的資料</el-button>
-        <br />
-        <label>查詢UserId的資料</label>
-        <el-select size="mini" type="number" v-model="UserId" clearable placeholder="選擇userId">
-            <el-option v-for="index in 10" :value="index">
-                <!--:value="index"==選到的值=index  -->
-            </el-option>
-        </el-select>
-        <br />
-        <el-button type="primary" @click="SingleGetUserId">查詢UserID</el-button>
-        <br />
-    </el-main>
-</script>
+<!DOCTYPE html>
+<html lang="en">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.min.js"
-    integrity="sha512-9PmLIATEd4w0OxdTHq61p12lQqa8OtDC6nXu0+S1Icb800oxoADle+gaPfmAXLa35KSvk/6bGeNRfi3nq0Hvvw=="
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 引入element-ui樣式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+        <el-container class="content">
+            <el-aside class="aside">
+                <br />
+                <el-row :gutter="10" type="flex">
+                    <el-col :span="10">
+                        <el-button type="primary" @click="GetData">獲取資料</el-button>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-button type="primary" @click="showData">顯示資料</el-button>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-button type="primary" @click="ShowDiaLog">彈出視窗</el-button>
+                    </el-col>
+                </el-row>
+                <br />
+            </el-aside>
+
+            <el-main class="main">
+                <menu-container :parent-Id="id"></menu-container>
+
+                <script type="text/x-template" id="menuComponent">
+                    <div>
+                        <label>id搜尋</label>
+                        <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="id"></el-input>
+                        <br />
+                        <label>你搜尋的id是:{{id}}</label>
+                        <br />
+                    </div>
+                </script>
+
+
+                <label>標題搜尋(title)</label>
+                <el-input size="mini" type="text" @keyup.enter.native="TitleSearch" v-model="title"></el-input>
+                <br />
+                <label>你搜尋的標題是:{{title}}</label>
+                <br />
+                <el-button type="primary" @click="AllSearch">共同搜尋</el-button>
+                <br />
+                <label>取得特定筆資料</label>
+                <el-input size="mini" type="number" v-model="dataCount"></el-input>
+                <br />
+                <el-button type="primary" @click="SingleGetData">取得第{{dataCount}}筆的資料</el-button>
+                <br />
+                <label>查詢UserId的資料</label>
+                <el-select size="mini" type="number" v-model="UserId" clearable placeholder="選擇userId">
+                    <el-option v-for="index in 10" :value="index">
+                        <!--:value="index"==選到的值=index  -->
+                    </el-option>
+                </el-select>
+                <br />
+                <el-button type="primary" @click="SingleGetUserId">查詢UserID</el-button>
+                <br />
+            </el-main>
+                    <el-main class="botton">
+                        修改新增
+                        <br />
+                        <label>Userid輸入</label>
+                        <el-input size="mini" maxlength="5" v-model="modifyValue.UserId"></el-input>
+                        <br />
+                        <label>你輸入的Userid是:{{modifyValue.UserId}}</label>
+                        <br />
+                        <label>id輸入</label>
+                        <el-input size="mini" maxlength="5" v-model="modifyValue.Id"></el-input>
+                        <br />
+                        <label>你輸入的id是:{{modifyValue.Id}}</label>
+                        <br />
+                        <label>title輸入</label>
+                        <el-input size="mini" v-model="modifyValue.Title"></el-input>
+                        <br />
+                        <label>你輸入的title是:{{modifyValue.Title}}</label>
+                        <br />
+                        <label>body輸入</label>
+                        <el-input size="mini" v-model="modifyValue.Body"></el-input>
+                        <br />
+                        <label>你輸入的body是:{{modifyValue.Body}}</label>
+                        <br />
+                        <el-button type="primary" @click="AddData">新增資料</el-button>
+                        <el-button type="primary" @click="DeleteSingleData">刪除特定資料</el-button>
+                    </el-main>
+        </el-container>
+        <section v-show="showdata">
+            <!-- 輸出資料區 -->
+            <div v-bind="outputData" v-for="(item,index) in outputData">
+                {
+                <br />
+                "userId":{{item.userId}},
+                <br />
+                "id":{{item.id}},
+                <br />
+                "title":{{item.title}},
+                <br />
+                "body":{{item.body}},
+                <br />
+                },
+                <br />
+                <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
+                <br />
+            </div>
+        </section>
+
+        <!-- 跳出視窗 -->
+        <el-dialog title="Menu" :visible.sync="dialogVisible" @close="" class="MenuDialog">
+            <!-- 呼叫menu組件 -->
+            <menu-container></menu-container>
+
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="dialogVisible = false">送出</el-button>
+        </el-dialog>
+
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.js"
+    integrity="sha512-DVdnL1SgeU//B2dtynn5ZdVMkjW/i/cCZRgkaAAl1sQVNVqtMi54Fr6o2tFo7M+3GWGX6VLLhNRRg9oKlMSGBw=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- 引入element-ui组件庫 -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
@@ -43,9 +138,6 @@
         const headers = {
             'Content-Type': 'application/json;',
         };
-        Vue.component('menu-container', {
-            template: `#menuComponent`,
-        })
         const app = new Vue({
             el: '#app',
             data: {
@@ -81,7 +173,10 @@
                         .catch((error) => { console.error(error) })
                 },
                 // 顯示資料
-                showData() { this.showdata = !(this.showdata) },
+                showData() {
+                    this.showdata = !(this.showdata);
+                    console.log(this.id);
+                },
                 // 搜尋ID的方法
                 IdSearch() {
                     if (isNaN(this.id)) {
@@ -253,7 +348,6 @@
                         axios.delete(`http://localhost:5293/MyApps/DeleteSingleData`,
                             { data: this.modifyValue }, { headers: headers })
                             .then((response) => {
-
                                 console.log(`資料刪除成功`);
                                 console.log(response);
                                 // 更新前端資料畫面
@@ -269,14 +363,47 @@
                 },
                 ShowDiaLog() {
                     this.dialogVisible = true;
-
                 },
-                components: {
+            },
+            components: {
+                'menu-container': {
+                    template: `#menuComponent`,
+                    props: ["parentId"],
+                    data: () => {
+                        return {
+                            id: '',
+                            outputdata: [],
+                        }
+                    },
+                    methods: {
+                        IdSearch() {
+                            this.id = parseInt;
+                            // 將id的資料型別轉數字
+                            this.id = parseInt(this.id);
+                            axios.post('http://localhost:5293/MyApps/IdSearch',
+                                this.id, { headers: headers })
+                                // axios請求提交數據,(位址，資料，表頭)
+                                .then((response) => {
+                                    // 回傳的值在這裡
+                                    console.log(`搜尋成功${response.data}`);
+                                    this.outputData = [];
+                                    this.outputData.push(response.data);
+                                    console.log(this.outputData);
+                                })
+                                .catch((error) => {
+                                    console.log(`搜尋失敗`);
+                                })
+                            // 清空輸入值
+                            this.id = null;
+                        },
+                    },
                 }
             },
-
         })
     })()
 
 
 </script>
+</body>
+
+</html>

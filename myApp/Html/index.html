@@ -37,9 +37,9 @@
                 <script type="text/x-template" id="menuComponent">
                     <div>
                         <label>id搜尋</label>
-                        <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="parentId"></el-input>
+                        <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="id"></el-input>
                         <br />
-                        <label>你搜尋的id是:{{parentId}}</label>
+                        <label>你搜尋的id是:{{id}}</label>
                         <br />
                     </div>
                 </script>
@@ -67,35 +67,32 @@
                 <el-button type="primary" @click="SingleGetUserId">查詢UserID</el-button>
                 <br />
             </el-main>
-
-            <el-contariner>
-                <el-main class="botton">
-                    修改新增
-                    <br />
-                    <label>Userid輸入</label>
-                    <el-input size="mini" maxlength="5" v-model="modifyValue.UserId"></el-input>
-                    <br />
-                    <label>你輸入的Userid是:{{modifyValue.UserId}}</label>
-                    <br />
-                    <label>id輸入</label>
-                    <el-input size="mini" maxlength="5" v-model="modifyValue.Id"></el-input>
-                    <br />
-                    <label>你輸入的id是:{{modifyValue.Id}}</label>
-                    <br />
-                    <label>title輸入</label>
-                    <el-input size="mini" v-model="modifyValue.Title"></el-input>
-                    <br />
-                    <label>你輸入的title是:{{modifyValue.Title}}</label>
-                    <br />
-                    <label>body輸入</label>
-                    <el-input size="mini" v-model="modifyValue.Body"></el-input>
-                    <br />
-                    <label>你輸入的body是:{{modifyValue.Body}}</label>
-                    <br />
-                    <el-button type="primary" @click="AddData">新增資料</el-button>
-                    <el-button type="primary" @click="DeleteSingleData">刪除特定資料</el-button>
-                </el-main>
-            </el-contariner>
+            <el-main class="botton">
+                修改新增
+                <br />
+                <label>Userid輸入</label>
+                <el-input size="mini" maxlength="5" v-model="modifyValue.UserId"></el-input>
+                <br />
+                <label>你輸入的Userid是:{{modifyValue.UserId}}</label>
+                <br />
+                <label>id輸入</label>
+                <el-input size="mini" maxlength="5" v-model="modifyValue.Id"></el-input>
+                <br />
+                <label>你輸入的id是:{{modifyValue.Id}}</label>
+                <br />
+                <label>title輸入</label>
+                <el-input size="mini" v-model="modifyValue.Title"></el-input>
+                <br />
+                <label>你輸入的title是:{{modifyValue.Title}}</label>
+                <br />
+                <label>body輸入</label>
+                <el-input size="mini" v-model="modifyValue.Body"></el-input>
+                <br />
+                <label>你輸入的body是:{{modifyValue.Body}}</label>
+                <br />
+                <el-button type="primary" @click="AddData">新增資料</el-button>
+                <el-button type="primary" @click="DeleteSingleData">刪除特定資料</el-button>
+            </el-main>
         </el-container>
         <section v-show="showdata">
             <!-- 輸出資料區 -->
@@ -189,7 +186,6 @@
                         alert(`搜尋值找不到，請重新輸入`);
                     }
                     else {
-
                         // 將id的資料型別轉數字
                         this.id = parseInt(this.id);
                         axios.post('http://localhost:5293/MyApps/IdSearch',
@@ -374,29 +370,26 @@
                     props: ["parentId"],
                     data: () => {
                         return {
-                            id: this.parentId,
+                            id: '',
                             outputdata: [],
                         }
                     },
                     methods: {
                         IdSearch() {
-                            // 將id的資料型別轉數字
-                            this.id = parseInt(this.id);
-                            axios.post('http://localhost:5293/MyApps/IdSearch',
-                                this.id, { headers: headers })
-                                // axios請求提交數據,(位址，資料，表頭)
+                            // 查詢userid
+                            axios.get(`http://localhost:5293/MyApps/?id=${this.UserId}`)
+                                // 差別點
                                 .then((response) => {
-                                    // 回傳的值在這裡
-                                    console.log(`搜尋成功${response.data}`);
+                                    console.log(response.data);
                                     this.outputData = [];
-                                    this.outputData.push(response.data);
-                                    console.log(this.outputData);
+                                    this.outputData = response.data;
                                 })
                                 .catch((error) => {
-                                    console.log(`搜尋失敗`);
+                                    console.log(`取得資料失敗`);
+                                    console.log(error);
                                 })
-                            // 清空輸入值
                             this.id = null;
+
                         },
                     },
                 }
