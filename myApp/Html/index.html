@@ -29,17 +29,24 @@
                     </el-col>
                 </el-row>
                 <br />
-
             </el-aside>
+
             <el-main class="main">
-                <label>id搜尋</label>
-                <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="id"></el-input>
-                <br />
-                <label>你搜尋的id是:{{id}}</label>
-                <br />
+                <menu-container :parent-Id="id"></menu-container>
+
+                <script type="text/x-template" id="menuComponent">
+                    <div>
+                        <label>id搜尋</label>
+                        <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="parentId"></el-input>
+                        <br />
+                        <label>你搜尋的id是:{{parentId}}</label>
+                        <br />
+                    </div>
+                </script>
+
+
                 <label>標題搜尋(title)</label>
                 <el-input size="mini" type="text" @keyup.enter.native="TitleSearch" v-model="title"></el-input>
-                <!-- <input @keyup.enter="TitleSearch" v-model="title"></input> -->
                 <br />
                 <label>你搜尋的標題是:{{title}}</label>
                 <br />
@@ -92,7 +99,7 @@
         </el-container>
         <section v-show="showdata">
             <!-- 輸出資料區 -->
-            <div v-model="outputData" v-for="(item,index) in outputData">
+            <div v-bind="outputData" v-for="(item,index) in outputData">
                 {
                 <br />
                 "userId":{{item.userId}},
@@ -108,19 +115,21 @@
                 <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
                 <br />
             </div>
-
         </section>
+
         <!-- 跳出視窗 -->
         <el-dialog title="Menu" :visible.sync="dialogVisible" @close="" class="MenuDialog">
+            <!-- 呼叫menu組件 -->
             <menu-container></menu-container>
-            <div w3-include-html="menu.html"></div>
+
             <el-button @click="dialogVisible = false">取消</el-button>
             <el-button type="primary" @click="dialogVisible = false">送出</el-button>
         </el-dialog>
+
     </div>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.min.js"
-    integrity="sha512-9PmLIATEd4w0OxdTHq61p12lQqa8OtDC6nXu0+S1Icb800oxoADle+gaPfmAXLa35KSvk/6bGeNRfi3nq0Hvvw=="
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.js"
+    integrity="sha512-DVdnL1SgeU//B2dtynn5ZdVMkjW/i/cCZRgkaAAl1sQVNVqtMi54Fr6o2tFo7M+3GWGX6VLLhNRRg9oKlMSGBw=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- 引入element-ui组件庫 -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
@@ -132,31 +141,6 @@
         const headers = {
             'Content-Type': 'application/json;',
         };
-
-
-        Vue.component('menu-container', {
-            data: function () {
-                let _data='';
-                fetch('./importTest.html')
-                    .then((res) => {
-                        console.log(`成功`);
-                        console.log(res);
-                        return res.text();
-                    })
-                    .then((data) => {
-                        _data = data;
-                         console.log(_data);
-                    })
-                    .catch((err) => {
-                        console.log(`錯誤`);
-                        console.log(err);
-                    })
-                return {
-                    dialogContext:_data,
-                }
-            },
-            template: `<div>{{dialogContext}}<div>`,
-        })
         const app = new Vue({
             el: '#app',
             data: {
@@ -192,7 +176,10 @@
                         .catch((error) => { console.error(error) })
                 },
                 // 顯示資料
-                showData() { this.showdata = !(this.showdata) },
+                showData() {
+                    this.showdata = !(this.showdata);
+                    console.log(this.id);
+                },
                 // 搜尋ID的方法
                 IdSearch() {
                     if (isNaN(this.id)) {
@@ -364,7 +351,6 @@
                         axios.delete(`http://localhost:5293/MyApps/DeleteSingleData`,
                             { data: this.modifyValue }, { headers: headers })
                             .then((response) => {
-
                                 console.log(`資料刪除成功`);
                                 console.log(response);
                                 // 更新前端資料畫面
@@ -380,12 +366,41 @@
                 },
                 ShowDiaLog() {
                     this.dialogVisible = true;
-
                 },
-                components: {
+            },
+            components: {
+                'menu-container': {
+                    template: `#menuComponent`,
+                    props: ["parentId"],
+                    data: () => {
+                        return {
+                            id: this.parentId,
+                            outputdata: [],
+                        }
+                    },
+                    methods: {
+                        IdSearch() {
+                            // 將id的資料型別轉數字
+                            this.id = parseInt(this.id);
+                            axios.post('http://localhost:5293/MyApps/IdSearch',
+                                this.id, { headers: headers })
+                                // axios請求提交數據,(位址，資料，表頭)
+                                .then((response) => {
+                                    // 回傳的值在這裡
+                                    console.log(`搜尋成功${response.data}`);
+                                    this.outputData = [];
+                                    this.outputData.push(response.data);
+                                    console.log(this.outputData);
+                                })
+                                .catch((error) => {
+                                    console.log(`搜尋失敗`);
+                                })
+                            // 清空輸入值
+                            this.id = null;
+                        },
+                    },
                 }
             },
-
         })
     })()
 
