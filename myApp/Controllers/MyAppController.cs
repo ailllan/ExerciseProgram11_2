@@ -60,17 +60,29 @@ public class MyAppsController : ControllerBase
 
     [HttpGet]
     [Route("~/MyApps/{id}")]
-    public async Task<List<Product>> SingleGet(int? id)
+    public async Task<List<Product>> SingleGet(int? userid)
 
     {
-        HttpResponseMessage response = await client.GetAsync($"https://jsonplaceholder.typicode.com/posts/?userId={id}");
+        // userID搜尋
+        HttpResponseMessage response = await client.GetAsync($"https://jsonplaceholder.typicode.com/posts/?userId={userid}");
         // 將 response的內容讀取並以字串的形式儲存
         jsondata = await response.Content.ReadAsStringAsync();
         List<Product> returnValue = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(jsondata);
         return returnValue;
 
     }
-
+    [HttpGet]
+    [Route("~/MyApps/IdSearch/{id}")]
+    public async Task<Product> IdSearch(int? id)
+    {
+        // 注意id搜尋是返回單筆資料
+        HttpResponseMessage response = await client.GetAsync($"https://jsonplaceholder.typicode.com/posts/{id}");
+        // 將 response的內容讀取並以字串的形式儲存
+        string jsondata = await response.Content.ReadAsStringAsync();
+        // 字串轉換成物件
+        Product returnValue = System.Text.Json.JsonSerializer.Deserialize<Product>(jsondata);
+        return returnValue;
+    }
 
 
     [HttpPost]
@@ -82,15 +94,15 @@ public class MyAppsController : ControllerBase
         return returndata;
     }
 
-    [HttpPost]
-    [Route("~/MyApps/IdSearch")]
-    public async Task<string> IdSearch([FromBody] int id)
-    {
-        //  Product型別資料序列化成字串。
-        string fildedData = System.Text.Json.JsonSerializer.Serialize(_itservice.IdSearch(id, datalist));
-        return fildedData;
-        // return "Idsearch";
-    }
+    // [HttpPost]
+    // [Route("~/MyApps/IdSearch")]
+    // public async Task<string> IdSearch([FromBody] int id)
+    // {
+    //     //  Product型別資料序列化成字串。
+    //     string fildedData = System.Text.Json.JsonSerializer.Serialize(_itservice.IdSearch(id, datalist));
+    //     return fildedData;
+    //     // return "Idsearch";
+    // }
 
     [HttpPost]
     [Route("~/MyApps/TitleSearch")]
