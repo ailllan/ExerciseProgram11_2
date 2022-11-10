@@ -12,7 +12,7 @@ public class MyAppsController : ControllerBase
     public string jsondata = null;
     // datalist=資料集，接收的資料，經過處理後最後會在這裡
     // 下方是兩種不同的初始化方式。
-    public static List<Product> datalist;
+    public static List<Product> datalist = new List<Product>();
     // public static List<Product> datalist;
     // 注入Logging的服務-->記錄管理Log
     private readonly ILogger<MyAppsController> _logger;
@@ -22,7 +22,7 @@ public class MyAppsController : ControllerBase
     {
         // 建構元注入
         // 所有在建構元的變數，都要註冊。
-        List<Product> datalist = new List<Product>();
+        // List<Product> datalist = new List<Product>();
         _logger = logger;
         _itservice = itservice;
         // datalist=_datalist;
@@ -95,24 +95,38 @@ public class MyAppsController : ControllerBase
     }
 
     // [HttpPost]
-    // [Route("~/MyApps/IdSearch")]
-    // public async Task<string> IdSearch([FromBody] int id)
+    // [Route("~/MyApps/IdSearch2")]
+    // public async Task<string> IdSearch2([FromBody] int id)
     // {
     //     //  Product型別資料序列化成字串。
     //     string fildedData = System.Text.Json.JsonSerializer.Serialize(_itservice.IdSearch(id, datalist));
     //     return fildedData;
-    //     // return "Idsearch";
     // }
 
     [HttpPost]
     [Route("~/MyApps/TitleSearch")]
-    public async Task<string> TitleSearch([FromBody] string title)
+    public async Task<List<Product>> TitleSearch([FromBody] string title)
     {
         //  Product型別資料序列化成字串(序列化)。
-        string fildedData = System.Text.Json.JsonSerializer.Serialize(_itservice.TitleSearch(title, datalist));
+        List<Product> fildedData=new List<Product>();
+        fildedData = _itservice.TitleSearch(title, datalist);
         return fildedData;
-        // return "Idsearch";
     }
+
+    [HttpPost]
+    [Route("~/MyApps/TitleSearchTwice")]
+    public async Task<List<Product>> TitleSearchTwice([FromBody] string title)
+    {
+        HttpResponseMessage response = await client.GetAsync("https://jsonplaceholder.typicode.com/posts");
+        //將抓到的HTTP資料內容轉/序列化成字串    
+        string data = await response.Content.ReadAsStringAsync();
+        // 將字串形式data反序列化成物件
+        List<Product> _data = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(data);
+        //  Product型別資料序列化成字串(序列化)。
+        List<Product> fildedData = _itservice.TitleSearch(title, _data);
+        return fildedData;
+    }
+
 
     [HttpPut]
     [Route("~/MyApps/AddData")]
@@ -144,7 +158,11 @@ public class MyAppsController : ControllerBase
         if (data.title != null)
         {
             // title過濾
-            datalist.Remove(_itservice.TitleSearch(data.title, datalist));
+            foreach (var item in _itservice.TitleSearch(data.title, datalist))
+            {
+                datalist.Remove(item);
+            }
+            
         }
 
         // userid過濾
@@ -160,9 +178,7 @@ public class MyAppsController : ControllerBase
                 datalist.Remove(item);
             }
         }
-
         //body過濾
-
         //移除資料
         // return "刪除資料資料成功";
         return datalist;
@@ -172,22 +188,3 @@ public class MyAppsController : ControllerBase
 
 
 
-public class searchValue
-{
-    // 模型繫結
-    // 同時搜尋id,title
-    // 對應到前端的searchValue的格式
-    public int? id { get; set; }
-    public string title { get; set; }
-}
-
-public class modifyhValue
-{
-    // 模型繫結
-    // id,Title,userId,Body
-    // 對應到前端的modifyValue的格式
-    public int? userId { get; set; }
-    public int? Id { get; set; }
-    public string Title { get; set; }
-    public string Body { get; set; }
-}
