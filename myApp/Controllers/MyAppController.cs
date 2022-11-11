@@ -59,7 +59,7 @@ public class MyAppsController : ControllerBase
     }
 
     [HttpGet]
-    [Route("~/MyApps/{id}")]
+    [Route("~/MyApps/{userid}")]
     public async Task<List<Product>> SingleGet(int? userid)
 
     {
@@ -94,38 +94,36 @@ public class MyAppsController : ControllerBase
         return returndata;
     }
 
-    // [HttpPost]
-    // [Route("~/MyApps/IdSearch2")]
-    // public async Task<string> IdSearch2([FromBody] int id)
-    // {
-    //     //  Product型別資料序列化成字串。
-    //     string fildedData = System.Text.Json.JsonSerializer.Serialize(_itservice.IdSearch(id, datalist));
-    //     return fildedData;
-    // }
-
     [HttpPost]
     [Route("~/MyApps/TitleSearch")]
     public async Task<List<Product>> TitleSearch([FromBody] string title)
     {
+        // 當datalist沒有資料的時候
+        if (datalist.Count == 0)
+        {
+            List<Product> fildedData = new List<Product>();
+            // 以非同步作業的方式，將 GET 要求傳送至指定的 URI，去獲取資料
+            HttpResponseMessage response = await client.GetAsync("https://jsonplaceholder.typicode.com/posts");
+            //將抓到的HTTP資料內容轉/序列化成字串    
+            string data = await response.Content.ReadAsStringAsync();
+            // 將字串形式data反序列化成物件
+            List<Product> _data = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(data);
+            //  Product型別資料序列化成字串(序列化)。
+            fildedData = _itservice.TitleSearch(title, _data);
+            return fildedData;
+
+        }
+        else
+        {
+            // 當datalist有資料的時候
+            List<Product> fildedData = new List<Product>();
+            fildedData = _itservice.TitleSearch(title, datalist);
+            return fildedData;
+        }
         //  Product型別資料序列化成字串(序列化)。
-        List<Product> fildedData=new List<Product>();
-        fildedData = _itservice.TitleSearch(title, datalist);
-        return fildedData;
+
     }
 
-    [HttpPost]
-    [Route("~/MyApps/TitleSearchTwice")]
-    public async Task<List<Product>> TitleSearchTwice([FromBody] string title)
-    {
-        HttpResponseMessage response = await client.GetAsync("https://jsonplaceholder.typicode.com/posts");
-        //將抓到的HTTP資料內容轉/序列化成字串    
-        string data = await response.Content.ReadAsStringAsync();
-        // 將字串形式data反序列化成物件
-        List<Product> _data = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(data);
-        //  Product型別資料序列化成字串(序列化)。
-        List<Product> fildedData = _itservice.TitleSearch(title, _data);
-        return fildedData;
-    }
 
 
     [HttpPut]
@@ -162,7 +160,7 @@ public class MyAppsController : ControllerBase
             {
                 datalist.Remove(item);
             }
-            
+
         }
 
         // userid過濾
