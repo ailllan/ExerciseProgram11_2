@@ -8,7 +8,7 @@ public interface ITservice
     public List<Product> TitleSearch(string title, List<Product> jsondata);
     public List<Product> BodySearch(string body, List<Product> jsondata);
 
-    public List<Product> AllSearch(string title, int? id, List<Product> jsondata);
+    public List<Product> AllSearch(string title, int? id, int? userid, List<Product> jsondata);
 }
 
 public class DataSearch : ITservice
@@ -29,7 +29,7 @@ public class DataSearch : ITservice
     }
     public List<Product> TitleSearch(string title, List<Product> jsondata)
     {
-         List<Product> retrurnvale = new List<Product>();
+        List<Product> retrurnvale = new List<Product>();
         foreach (var item in jsondata)
         {
             // 判斷是否包含title
@@ -40,13 +40,13 @@ public class DataSearch : ITservice
         }
         return retrurnvale;
     }
-    public List<Product> AllSearch(string title, int? id, List<Product> jsondata)
+    public List<Product> AllSearch(string title, int? id, int? userid, List<Product> jsondata)
     {
         List<Product> retrurnvale = new List<Product>();
         foreach (var item in jsondata)
         {
             // 判斷是否包含title
-            if (item.title.Contains(title) || item.id == id)
+            if (item.id == id && item.userId == userid && item.title.Contains(title))
             {
                 retrurnvale.Add(item);
 

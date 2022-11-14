@@ -22,9 +22,6 @@
                         <el-button type="primary" @click="GetData">獲取資料(初始化)</el-button>
                     </el-col>
                     <el-col :span="10">
-                        <el-button type="primary" @click="showData">顯示資料</el-button>
-                    </el-col>
-                    <el-col :span="10">
                         <el-button type="primary" @click="ShowDiaLog">彈出視窗</el-button>
                     </el-col>
                 </el-row>
@@ -32,39 +29,12 @@
             </el-aside>
 
             <el-main class="main">
-                <!-- 呼叫menu組件 -->
-                <menu-container v-bind="searchValue" :output-data="outputData" @update="updateInfo"></menu-container>
+                <!-- 呼叫menus組件 -->
+                <menu-component  v-bind:output-data="outputData"  :paren-msg="parenMsg" :show-data="showdata" @update="updateInfo">
 
-                <!-- x-template寫法，包覆組件內html -->
-                <script type="text/x-template" id="menuComponent">
-                    <div>
-                        <label>請輸入id</label>
-                        <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="searchValue.Id"></el-input>
-                        <br />
-                        <label>你搜尋的id是:{{searchValue.Id}}</label>
-                        <br />
-                        <label>請輸入title</label>
-                        <el-input size="mini" type="text" @keyup.enter.native="TitleSearch" v-model="searchValue.Title"></el-input>
-                        <br />
-                        <label>你搜尋的標題是:{{searchValue.Title}}</label>
-                        <br />
-                        <label>請輸入userId</label>
-                        <el-input size="mini" type="text"v-model="searchValue.Userid"></el-input>
-                        <br />
-                        <label>你搜尋的userId是:{{searchValue.Userid}}</label>
-                        <br />
-                        <el-button type="primary" @click="AllSearch">送出資料</el-button>
-                        <br />
-                        <label>取得特定一筆的資料</label>
-                        <el-input size="mini" type="number" v-model="dataCount"></el-input>
-                        <br />
-                        <el-button type="primary" @click="SingleGetData">取得第{{dataCount}}筆的資料</el-button>
-                        <br />
-                        <el-button type="primary" >無作用按鈕</el-button>
-                    </div>
-                </script>
-                <!-- x-template寫法結束 -->
+                </menu-component>
 
+                <script type="text/x-template" id="menuComponent"></script>
             </el-main>
             <el-main class="botton">
                 修改新增
@@ -93,9 +63,9 @@
                 <el-button type="primary" @click="DeleteSingleData">刪除特定資料</el-button>
             </el-main>
         </el-container>
-        <section v-show="showdata">
+        <section >
             <!-- 輸出資料區 -->
-            <div v-bind="outputData" v-for="(item,index) in outputData">
+            <!-- <div v-bind="outputData" v-for="(item,index) in outputData">
                 {
                 <br />
                 "userId":{{item.userId}},
@@ -110,7 +80,7 @@
                 <br />
                 <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
                 <br />
-            </div>
+            </div> -->
 
             <div v-bind="update" v-for="(item,index) in update">
                 {
@@ -128,19 +98,33 @@
                 <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
                 <br />
             </div>
-
-
         </section>
-
         <!-- 跳出視窗 -->
         <el-dialog title="Menu" :visible.sync="dialogVisible" @close="" class="MenuDialog">
             <!-- 呼叫menu組件 -->
-            <menu-container v-bind="searchValue" :output-data="outputData" @update="updateInfo"></menu-container>
+            <menu-component  :output-data="outputData" :paren-msg="parenMsg" :show-data="showdata" @update="updateInfo">
 
+            </menu-component>
+            <div v-bind="outputData" v-for="item in outputData">
+                <el-descriptions title="資料輸出區" :column="4" border>
+                    <el-descriptions-item label="userId">{{item.userId}}</el-descriptions-item>
+                    <el-descriptions-item label="id">{{item.id}}</el-descriptions-item>
+                    <el-descriptions-item label="title">
+                        <!-- <el-tag size="small">{{item.title}}</el-tag> -->
+                    </el-descriptions-item>
+                    <el-descriptions-item label="body">
+                        <!-- <el-tag size="small">{{item.body}}</el-tag> -->
+                    </el-descriptions-item>
+                </el-descriptions>
+                <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
+                <el-button type="primary" @click="DeleteData(item.id)">送出到MainTable</el-button>
+                <br />
+            </div>
             <el-button @click="dialogVisible = false">關閉</el-button>
         </el-dialog>
-
     </div>
+    <!-- Html module 的方式引入，某些瀏覽器可能不支援 -->
+<script type="module" src="./Component/App.js"></script>
 </body>
 <!-- 引入vue -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.js"
@@ -152,335 +136,8 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- 引入element-ui组件庫 -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script>
-
-    // func包裹住程式，當與其他人的程式並接時候就不會有命名衝突或是區塊衝突等問題
-    ; (function () {
-        // HttpHeader設定檔(傳送內容以外的資訊)
-        const headers = {
-            'Content-Type': 'application/json;',
-        };
-        Vue.use(Vuex);
-        const store = new Vuex.Store({
-            state: {
-                _searchValue: {
-                    id: null,
-                    title: null,
-                    userid: null,
-                },
-                _outputData: [],
-            },
-            mutations: {
-                // mutations負責接收action並更改state的資料
-                //mutation是vuex中唯一可以改動state的方法
-                // state=可更改/取用state的值，payload從action傳來的參數
-                UPDATE_OUTPUT(state, payload) {
-                    // 清空之前的值
-                    console.log(`mutations有執行 `);
-                    console.log(payload);
-                    state._outputData = [];
-                    payload.forEach(element => {
-                        state._outputData.push(element);
-                    });
-                    console.log(state._outputData);
-                },
-            },
-            actions: {
-                updateOutputData(context, resData) {
-                    console.log(`action有執行 `);
-                    console.log(resData);
-                    context.commit("UPDATE_OUTPUT", resData);
-                }
-            },
-            getters: {
-                outputData: state => { return state._outputData }
-            },
-        })
-        const app = new Vue({
-            el: '#app',
-            // 引入store
-            store,
-            data: {
-                showdata: false,
-                outputData: [],
-                searchValue: {
-                    id: null,
-                    title: null,
-                    userid: null,
-                },
-                dataCount: 0,
-                DataLength: 0,
-                modifyValue: {
-                    UserId: null,
-                    Id: null,
-                    Title: null,
-                    Body: null,
-                },
-                dialogVisible: false,
-                dialogcontain: null,
-            },
-            methods: {
-                GetData() {
-                    axios.get('http://localhost:5293/MyApps')
-                        .then((res) => {
-                            this.outputData = res.data;
-                            DataLength = this.outputData.length;
-                            //暫存資料
-                            console.log("資料獲取成功");
-                        })
-                        .catch((error) => { console.error(error) })
-                },
-                // 顯示資料
-                showData() {
-                    this.showdata = !(this.showdata);
-                },
-                AddData() {
-                    console.log(this.modifyValue);
-                    // 新增資料
-                    if (this.modifyValue == null) {
-                        return null;
-                    }
-                    else {
-                        axios.put('http://localhost:5293/MyApps/AddData',
-                            this.modifyValue, { headers: headers })
-                            .then((response) => {
-                                console.log(`推送資料成功`);
-                                console.log(response);
-                                this.outputData = [];
-                                this.outputData = response.data;
-                                DataLength = this.outputData.length;
-                            })
-                            .catch((error) => {
-                                console.log(`推送資料失敗`);
-                                console.log(error);
-                            })
-                    }
-                    // 清空輸入值
-                    this.modifyValue = {};
-                },
-                DeleteData(id) {
-                    // 單筆資料刪除
-                    console.log(id);
-                    axios.delete(`http://localhost:5293/MyApps/DeletData/${id}`)
-                        .then((response) => {
-                            console.log(`刪除資料成功`);
-                            console.log(response);
-                            this.outputData = [];
-                            // 更新前端資料畫面
-                            this.outputData = response.data;
-                            DataLength = this.outputData.length;
-                        })
-                        .catch((error) => {
-                            console.log(`刪除資料失敗`);
-                            console.log(error);
-                        })
-                    this.modifyValue = {};
-                },
-
-                DeleteSingleData() {
-                    // 特定資料刪除
-                    if (this.modifyValue.Id == null && this.modifyValue.Title == null
-                        && this.modifyValue.UserId == null && this.modifyValue.Body == null) {
-                        alert("輸入值為空");
-                    }
-                    else {
-                        axios.delete(`http://localhost:5293/MyApps/DeleteSingleData`,
-                            { data: this.modifyValue }, { headers: headers })
-                            .then((response) => {
-                                console.log(`資料刪除成功`);
-                                console.log(response);
-                                // 更新前端資料畫面
-                                this.outputData = [];
-                                this.outputData = response.data;
-                            })
-                            .catch((error) => {
-                                console.log(`資料刪除失敗`);
-                                console.log(error);
-                            })
-                    }
-                    this.modifyValue = {};
-                },
-                ShowDiaLog() {
-                    this.dialogVisible = true;
-                },
-                updateInfo(val) {
-                    // 父組件更新outputData
-                    this.outputData = val;
-                },
-
-            },
-
-            components: {
-                'menu-container': {
-                    template: `#menuComponent`,
-                    props: ['id', 'title', 'userid', 'outputData',],
-                    data: () => {
-                        return {
-                            searchValue: {
-                                Id: this.id,
-                                Title: this.title,
-                                Userid: this.userid,
-                            },
-                            dataCount: 0,
-                            outputdata: this.outputData,
-                        }
-                    },
-                    methods: {
-                        IdSearch() {
-                            if (isNaN(this.searchValue.Id)) {
-                                alert(`請輸入數字`);
-                            }
-                            else {
-                                // 將id的資料型別轉數字
-                                this.searchValue.Id = parseInt(this.searchValue.Id);
-                                console.log(this.searchValue.Id);
-                                axios.get(`http://localhost:5293/MyApps/IdSearch/${this.searchValue.Id}`,
-                                    { headers: headers })
-                                    // axios請求提交數據,(位址，資料，表頭)
-                                    .then((response) => {
-                                        // 回傳的值在這裡
-                                        console.log(`搜尋成功`);
-                                        this.outputdata = [];
-                                        this.outputdata.push(response.data);
-                                        console.log(this.outputdata);
-                                    })
-                                    .catch((error) => {
-                                        console.log(`搜尋失敗`);
-                                    })
-                            }
-                            // 清空輸入值
-                            this.searchValue.Id = null;
-                        },
-                        TitleSearch() {
-                            console.log(this.searchValue.Title);
-                            axios.post('http://localhost:5293/MyApps/TitleSearch',
-                                this.searchValue.Title, { headers: headers })
-                                // axios請求提交數據,(位址，資料，表頭)
-                                .then((response) => {
-                                    // 回傳的值在這裡
-                                    this.$store.dispatch('updateOutputData', response.data);
-                                    console.log(` Title搜尋成功`);
-                                })
-                                .catch((error) => {
-                                    console.log(` Title搜尋失敗`);
-                                    console.log(this.title);
-                                    console.log(error);
-                                })
-                            // 清空輸入值
-                            this.searchValue.Title = null;
-                        },
-                        AllSearch() {
-                            if (this.searchValue.Id == null ||
-                                this.searchValue.Title == null || this.searchValue.Userid == null) {
-                                // 可改善點
-                                if (this.searchValue.Id != null) {
-                                    console.log(`做id搜尋`);
-                                    this.searchValue.Id = parseInt(this.searchValue.Id);
-                                    this.IdSearch();
-                                }
-                                if (this.searchValue.Userid != null) {
-                                    console.log(`做UserId搜尋`);
-                                    this.SingleGetUserId()
-                                }
-                                if (this.searchValue.Title != null) {
-                                    console.log(`做title搜尋`);
-                                    this.TitleSearch()
-                                }
-                            }
-                            else if (this.searchValue.Id != null &&
-                                this.searchValue.Title != null && this.searchValue.Userid != null) {
-                                console.log(`做總搜尋`);
-                                this.searchValue.Id = parseInt(this.searchValue.Id);
-                                this.searchValue.Userid = parseInt(this.searchValue.Userid);
-                                axios.post('http://localhost:5293/MyApps/AllSearch',
-                                    this.searchValue, { headers: headers })
-                                    // axios請求提交數據,(位址，資料，表頭)
-                                    .then((response) => {
-                                        // 回傳的值在這裡
-                                        console.log(response.data);
-                                        this.outputData = response.data;
-                                    })
-                                    .catch((error) => {
-                                        console.log(`Allsearch錯誤${this.searchValue}`);
-                                        console.log(error);
-                                    })
-                            }
-                            this.id = null;
-                            this.title = null;
-                        },
-                        SingleGetData() {
-                            // 用GET的方式單獨查詢一筆資料
-                            if (this.dataCount < 0) {
-                            }
-                            else {
-                                axios.get(`http://localhost:5293/MyApps/?id=${this.dataCount}`)
-                                    .then((response) => {
-                                        console.log(response.data);
-                                        this.outputdata = [];
-                                        this.outputdata = response.data;
-                                    })
-                                    .catch((error) => {
-                                        console.log(`取得資料失敗`);
-                                        console.log(error);
-                                    })
-                            }
-                            this.dataCount = 0;
-                        },
-                        SingleGetUserId() {
-                            // 查詢userid
-                            this.searchValue.Userid = parseInt(this.searchValue.Userid);
-                            console.log(typeof (this.searchValue.Userid));
-                            axios.get(`http://localhost:5293/MyApps/${this.searchValue.Userid}`)
-                                // 差別點
-                                .then((response) => {
-                                    console.log(response.data);
-                                    this.outputdata = [];
-                                    this.outputdata = response.data;
-                                })
-                                .catch((error) => {
-                                    console.log(`取得資料失敗`);
-                                    console.log(error);
-                                })
-                            this.searchValue.Userid = 0;
-                        },
-                    },
-                    watch: {
-                        //watch 可傳入參數，第一個參數是更新後的值，第二是舊值。 
-                        // watch->監聽變數
-                        searchValue: {
-                            // deep=true，偵測物件裡面的屬性更動，如果沒有，他不會偵測物件類型的屬性更動
-                            deep: true,
-                            // 物件改變時，執行handler()
-                            handler() {
-                                // console.log(`searchValue改變了${this.searchValue.Id}`);
-                            },
-                        },
-                        outputdata: {
-                            handler() {
-                                console.log(`outputdata改變了${this.outputdata}`);
-                                // $emit語法糖，將子元件的資料傳遞給父元件，自訂義事件
-                                // 事件名稱,傳遞的資料(子元件)
-                                this.$emit('update', this.outputdata);
-                            }
-                        },
-                    },
-
-                }
-            },
-            computed: {
-                // 將結果暫存在updat，當參考值改變時(this.$store.getters.outputData)，
-                // compute會重新執行
-                update() {
-                    return this.$store.getters.outputData;
-                }
-            },
-        })
-
-    })()
 
 
-
-</script>
 </body>
 
 </html>

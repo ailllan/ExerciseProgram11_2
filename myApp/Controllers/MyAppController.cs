@@ -90,7 +90,7 @@ public class MyAppsController : ControllerBase
     // [FromBody]='參數繫結' searchValue data='模型繫結/綁定'
     public string AllSearch([FromBody] searchValue data)
     {
-        string returndata = System.Text.Json.JsonSerializer.Serialize(_itservice.AllSearch(data.title, data.id, datalist));
+        string returndata = System.Text.Json.JsonSerializer.Serialize(_itservice.AllSearch(data.title, data.id,data.userid, datalist));
         return returndata;
     }
 

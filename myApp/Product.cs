@@ -18,6 +18,7 @@ public class searchValue
     // 對應到前端的searchValue的格式
     public int? id { get; set; }
     public string title { get; set; }
+    public int? userid { get; set; }
 }
 
 public class modifyhValue
