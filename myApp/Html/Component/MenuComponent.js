@@ -1,4 +1,6 @@
 
+// header放最上方
+// store可以放在主體，不用移來
 const headers = {
     'Content-Type': 'application/json;',
 };
@@ -151,7 +153,8 @@ export default {
                     .then((response) => {
                         console.log(response.data);
                         this.outputdata = [];
-                        this.outputdata = response.data;
+                        // this.outputdata = response.data;
+                        this.$store.dispatch('updateOutputData', response.data);
                     })
                     .catch((error) => {
                         console.log(`取得資料失敗`);
@@ -169,7 +172,8 @@ export default {
                 .then((response) => {
                     console.log(response.data);
                     this.outputdata = [];
-                    this.outputdata = response.data;
+                    // this.outputdata = response.data;
+                    this.$store.dispatch('updateOutputData', response.data);
                 })
                 .catch((error) => {
                     console.log(`取得資料失敗`);

@@ -27,7 +27,6 @@ import MenuComponent from "./MenuComponent.js";
                         state._outputData.push(element);
                     });
                 }
-
                 console.log(state._outputData);
             },
         },
@@ -70,13 +69,8 @@ import MenuComponent from "./MenuComponent.js";
                     })
                     .catch((error) => { console.error(error) })
             },
-            // 顯示資料
-            showData() {
-                this.showdata = !(this.showdata);
-            },
+            // 新增資料
             AddData() {
-                console.log(this.modifyValue);
-                // 新增資料
                 if (this.modifyValue == null) {
                     return null;
                 }
@@ -88,6 +82,7 @@ import MenuComponent from "./MenuComponent.js";
                             console.log(response);
                             this.outputData = [];
                             this.outputData = response.data;
+                            // this.$store.dispatch('updateOutputData', response.data);
                             DataLength = this.outputData.length;
                         })
                         .catch((error) => {
@@ -98,9 +93,8 @@ import MenuComponent from "./MenuComponent.js";
                 // 清空輸入值
                 this.modifyValue = {};
             },
+            // 單筆資料刪除
             DeleteData(id) {
-                // 單筆資料刪除
-                console.log(id);
                 axios.delete(`http://localhost:5293/MyApps/DeletData/${id}`)
                     .then((response) => {
                         console.log(`刪除資料成功`);
@@ -108,6 +102,7 @@ import MenuComponent from "./MenuComponent.js";
                         this.outputData = [];
                         // 更新前端資料畫面
                         this.outputData = response.data;
+                        // this.$store.dispatch('updateOutputData', response.data);
                         DataLength = this.outputData.length;
                     })
                     .catch((error) => {
@@ -116,9 +111,8 @@ import MenuComponent from "./MenuComponent.js";
                     })
                 this.modifyValue = {};
             },
-
+            // 特定資料刪除
             DeleteSingleData() {
-                // 特定資料刪除
                 if (this.modifyValue.Id == null && this.modifyValue.Title == null
                     && this.modifyValue.UserId == null && this.modifyValue.Body == null) {
                     alert("輸入值為空");
@@ -132,6 +126,7 @@ import MenuComponent from "./MenuComponent.js";
                             // 更新前端資料畫面
                             this.outputData = [];
                             this.outputData = response.data;
+                            // this.$store.dispatch('updateOutputData', response.data);
                         })
                         .catch((error) => {
                             console.log(`資料刪除失敗`);
@@ -148,7 +143,16 @@ import MenuComponent from "./MenuComponent.js";
             updateInfo(val) {
                 this.outputData = val;
             },
-
+            // 推送資料到主畫面
+            pushToTable(pushData) {
+                // 防止重複推送，有重複不push
+                if (this.outputData.includes(pushData)) {
+                    
+                }else{
+                  this.outputData.push(pushData);
+                }
+                  
+            }
         },
         components: {
             MenuComponent
@@ -161,6 +165,4 @@ import MenuComponent from "./MenuComponent.js";
             }
         },
     })
-
-
 })();

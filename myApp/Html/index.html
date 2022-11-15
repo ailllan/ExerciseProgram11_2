@@ -65,24 +65,7 @@
         </el-container>
         <section >
             <!-- 輸出資料區 -->
-            <!-- <div v-bind="outputData" v-for="(item,index) in outputData">
-                {
-                <br />
-                "userId":{{item.userId}},
-                <br />
-                "id":{{item.id}},
-                <br />
-                "title":{{item.title}},
-                <br />
-                "body":{{item.body}},
-                <br />
-                },
-                <br />
-                <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
-                <br />
-            </div> -->
-
-            <div v-bind="update" v-for="(item,index) in update">
+            <div v-bind="outputData" v-for="(item,index) in outputData">
                 {
                 <br />
                 "userId":{{item.userId}},
@@ -98,6 +81,23 @@
                 <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
                 <br />
             </div>
+
+            <!-- <div v-bind="update" v-for="(item,index) in update">
+                {
+                <br />
+                "userId":{{item.userId}},
+                <br />
+                "id":{{item.id}},
+                <br />
+                "title":{{item.title}},
+                <br />
+                "body":{{item.body}},
+                <br />
+                },
+                <br />
+                <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
+                <br />
+            </div> -->
         </section>
         <!-- 跳出視窗 -->
         <el-dialog title="Menu" :visible.sync="dialogVisible" @close="" class="MenuDialog">
@@ -105,8 +105,8 @@
             <menu-component  :output-data="outputData" :paren-msg="parenMsg" :show-data="showdata" @update="updateInfo">
 
             </menu-component>
-            <div v-bind="outputData" v-for="item in outputData">
-                <el-descriptions title="資料輸出區" :column="4" border>
+            <div v-bind="update" v-for="item in update">
+                <el-descriptions  :column="4" border>
                     <el-descriptions-item label="userId">{{item.userId}}</el-descriptions-item>
                     <el-descriptions-item label="id">{{item.id}}</el-descriptions-item>
                     <el-descriptions-item label="title">
@@ -117,7 +117,7 @@
                     </el-descriptions-item>
                 </el-descriptions>
                 <el-button type="primary" @click="DeleteData(item.id)">刪除資料</el-button>
-                <el-button type="primary" @click="DeleteData(item.id)">送出到MainTable</el-button>
+                <el-button type="primary" @click="pushToTable(item)">送出到MainTable</el-button>
                 <br />
             </div>
             <el-button @click="dialogVisible = false">關閉</el-button>
