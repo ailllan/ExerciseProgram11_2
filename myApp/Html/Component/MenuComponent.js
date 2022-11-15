@@ -7,20 +7,20 @@ const headers = {
 export default {
 
     template: `  <div>
-        <label>請輸入id</label>
+        <label>{{$t("main.id")}}</label>
         <el-input size="mini" type="text" v-on:keyup.enter.native=" IdSearch" v-model="searchValue.Id"></el-input>
         <br />
-        <label>你搜尋的id是:{{searchValue.Id}}</label>
+        <label>{{$t("main.searchId")}}:{{searchValue.Id}}</label>
         <br />
-        <label>請輸入title</label>
+        <label>{{$t("main.title")}}</label>
         <el-input size="mini" type="text" @keyup.enter.native="TitleSearch" v-model="searchValue.Title"></el-input>
         <br />
-        <label>你搜尋的標題是:{{searchValue.Title}}</label>
+        <label>{{$t("main.searchtitle")}}{{searchValue.Title}}</label>
         <br />
-        <label>請輸入userId</label>
+        <label>{{$t("main.userid")}}</label>
         <el-input size="mini" type="text"v-model="searchValue.Userid"></el-input>
         <br />
-        <label>你搜尋的userId是:{{searchValue.Userid}}</label>
+        <label>{{$t("main.searchUserId")}}{{searchValue.Userid}}</label>
         <br />
         <el-button type="primary" @click="AllSearch">送出資料</el-button>
         <br />
@@ -46,7 +46,7 @@ export default {
                 Userid: null,
             },
             dataCount: 0,
-            outputdata: [],
+            menu_outputdata: [],
             // parenMsg:props.parenMsg,
         }
     },
@@ -68,11 +68,12 @@ export default {
                     .then((response) => {
                         // 回傳的值在這裡
                         console.log(`搜尋成功`);
-                        this.$store.dispatch('updateOutputData', response.data);
-
+                        console.log(response.data);
+                        // this.$store.dispatch('updateOutputData', response.data);
                         // props in emit out的方法----------------------------------------------------------------
-                        // this.outputdata = [];
-                        // this.outputdata.push(response.data);
+                        this.menu_outputdata = [];
+                        // this.$emit('update', response.data);
+                        this.menu_outputdata.push(response.data);
                         // props in emit out的方法----------------------------------------------------------------
                         // this.parenMsg=this.searchValue.Id; //無法直接改變props
                     })
@@ -152,8 +153,8 @@ export default {
                 axios.get(`http://localhost:5293/MyApps/?id=${this.dataCount}`)
                     .then((response) => {
                         console.log(response.data);
-                        this.outputdata = [];
-                        // this.outputdata = response.data;
+                        this.menu_outputdata = [];
+                        // this.menu_outputdata = response.data;
                         this.$store.dispatch('updateOutputData', response.data);
                     })
                     .catch((error) => {
@@ -171,8 +172,8 @@ export default {
                 // 差別點
                 .then((response) => {
                     console.log(response.data);
-                    this.outputdata = [];
-                    // this.outputdata = response.data;
+                    this.menu_outputdata = [];
+                    // this.menu_outputdata = response.data;
                     this.$store.dispatch('updateOutputData', response.data);
                 })
                 .catch((error) => {
@@ -200,10 +201,10 @@ export default {
         },
         outputdata: {
             handler() {
-                console.log(`outputdata改變了${this.outputdata}`);
+                console.log(`outputdata改變了${this.menu_outputdata}`);
                 // $emit語法糖，將子元件的資料傳遞給父元件，自訂義事件
                 // 事件名稱,傳遞的資料(子元件)
-                this.$emit('update', this.outputdata);
+                this.$emit('update', this.menu_outputdata);
             }
         },
     },

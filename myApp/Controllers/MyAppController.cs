@@ -20,6 +20,7 @@ public class MyAppsController : ControllerBase
     private readonly ITservice _itservice;
     public MyAppsController(ILogger<MyAppsController> logger, ITservice itservice)
     {
+        // logging API 讓開發人員可以輕鬆地使用內建或第三方的日誌紀錄框架。
         // 建構元注入
         // 所有在建構元的變數，都要註冊。
         // List<Product> datalist = new List<Product>();

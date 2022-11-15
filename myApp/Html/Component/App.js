@@ -1,6 +1,80 @@
 import MenuComponent from "./MenuComponent.js";
 (function () {
+    const messages = {
+        en: {
+            Button: {
+                getData: "getData and initialization",
+                popDialog: " pop-up dialog",
+                sumitbtn:"sumit",
+                getsinglebtn:"get single data",
+            },
+            main: {
 
+                id: "key in id",
+                searchId: "The id you searched for is:",
+                userid: "key in userid",
+                searchUserId: "The user id you are searching for is:",
+                title: "key in title",
+                searchtitle: "The title you searched for is:",
+            }
+        },
+        tw: {
+            Button: {
+                getData: "獲取資料(初始化)",
+                popDialog: "彈出視窗",
+                sumitbtn:"送出資料",
+                getsinglebtn:"取得特定一筆的資料",
+            },
+            main: {
+
+                id: "id輸入",
+                searchId: "你輸入的Userid是:",
+                userid: "Userid輸入",
+                searchUserId: "你輸入的Userid是:",
+                title: "title輸入",
+                searchtitle: "你輸入的title是:",
+            }
+        },
+        jp: {
+            Button: {
+                getData: "getdata と初期化",
+                popDialog: " ポップアップ ダイアログ",
+                sumitbtn:"サミットt",
+                getsinglebtn:"単一のデータを取得する",
+            },
+            main: {
+
+                id: "キー入力ID",
+                searchId: "検索した ID は次のとおりです。",
+                userid: "ユーザーIDのキー",
+                searchUserId: "ユーザーIDのキー:",
+                title: "タイトルのキー",
+                searchtitle: "検索したタイトルは次のとおりです。",
+            }
+        },
+        cn:{
+            Button: {
+                getData: "获取资料(初始化)",
+                popDialog: "弹出视窗",
+                sumitbtn:"送出资料",
+                getsinglebtn:"取得特定一笔的资料",
+            },
+            main: {
+
+                id: "id输入",
+                searchId: "你输入的id是:",
+                userid: "键入用户标识",
+                searchUserId: "你输入的Userid是:",
+                title: "键入标题",
+                searchtitle: "您搜索的标题是：",
+            }
+        },
+    };
+    const i18n = new VueI18n({
+        //定義默認語言
+        locale: 'tw', // 語系可以先指定或之後指定
+        messages: messages
+      })
     Vue.use(Vuex);
     const store = new Vuex.Store({
         state: {
@@ -38,6 +112,8 @@ import MenuComponent from "./MenuComponent.js";
             }
         },
         getters: {
+            // getters 類似組件中的computed
+            // getters的返回質會被暫存起來，當他的依賴被改變時才會重新計算
             outputData: state => { return state._outputData }
         },
     })
@@ -46,6 +122,8 @@ import MenuComponent from "./MenuComponent.js";
         el: '#app',
         // 引入store
         store,
+        // 引入i18n
+        i18n: i18n,
         data: {
             showdata: false,
             outputData: [],
@@ -55,6 +133,7 @@ import MenuComponent from "./MenuComponent.js";
                 Title: null,
                 Body: null,
             },
+            Language:'',
             dialogVisible: false,
             dialogcontain: null,
             parenMsg: 'Vue實體的資料',
@@ -147,12 +226,17 @@ import MenuComponent from "./MenuComponent.js";
             pushToTable(pushData) {
                 // 防止重複推送，有重複不push
                 if (this.outputData.includes(pushData)) {
-                    
-                }else{
-                  this.outputData.push(pushData);
+
+                } else {
+                    this.outputData.push(pushData);
                 }
-                  
-            }
+
+            },
+            
+            changeLanguage(val){
+                console.log(this.$i18n);
+                this.$i18n.locale=this.Language;
+            },
         },
         components: {
             MenuComponent

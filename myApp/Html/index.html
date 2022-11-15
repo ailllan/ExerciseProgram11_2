@@ -24,6 +24,12 @@
                     <el-col :span="10">
                         <el-button type="primary" @click="ShowDiaLog">彈出視窗</el-button>
                     </el-col>
+                    <el-select size="mini" type="text" v-model="Language"  placeholder="language" @change="changeLanguage" >
+                        <el-option value="en" name="english"></el-option>
+                        <el-option value="tw" name="繁體中文"></el-option>
+                        <el-option value="cn" name="簡体中文"></el-option>
+                        <el-option value="jp" name="日本語"></el-option>
+                    </el-select>
                 </el-row>
                 <br />
             </el-aside>
@@ -39,20 +45,20 @@
             <el-main class="botton">
                 修改新增
                 <br />
-                <label>Userid輸入</label>
+                <label>{{$t("main.userid")}}</label>
                 <el-input size="mini" maxlength="5" v-model="modifyValue.UserId"></el-input>
                 <br />
-                <label>你輸入的Userid是:{{modifyValue.UserId}}</label>
+                <label>{{$t("main.searchUserId")}}{{modifyValue.UserId}}</label>
                 <br />
-                <label>id輸入</label>
+                <label>{{$t("main.id")}}</label>
                 <el-input size="mini" maxlength="5" v-model="modifyValue.Id"></el-input>
                 <br />
-                <label>你輸入的id是:{{modifyValue.Id}}</label>
+                <label>{{$t("main.searchId")}}:{{modifyValue.Id}}</label>
                 <br />
-                <label>title輸入</label>
+                <label>{{$t("main.title")}}</label>
                 <el-input size="mini" v-model="modifyValue.Title"></el-input>
                 <br />
-                <label>你輸入的title是:{{modifyValue.Title}}</label>
+                <label>{{$t("main.searchtitle")}}:{{modifyValue.Title}}</label>
                 <br />
                 <label>body輸入</label>
                 <el-input size="mini" v-model="modifyValue.Body"></el-input>
@@ -125,6 +131,7 @@
     </div>
     <!-- Html module 的方式引入，某些瀏覽器可能不支援 -->
 <script type="module" src="./Component/App.js"></script>
+<script src="https://unpkg.com/vue-i18n@8"></script>
 </body>
 <!-- 引入vue -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.13/vue.js"
